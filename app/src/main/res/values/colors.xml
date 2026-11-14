@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 主题色：肉粉色系（柔和暖裸粉），集中管理方便整体换色 -->
+    <color name="color_primary">#F2A0AA</color>        <!-- 主色：标题栏（肉粉） -->
+    <color name="color_primary_dark">#DE7E8C</color>   <!-- 深色：状态栏（深肉粉） -->
+    <color name="color_accent">#F7C2C8</color>         <!-- 强调色：输入框下划线/按钮（浅肉粉） -->
+    <color name="bg_list">#FDEEF0</color>              <!-- 列表背景：极浅肉粉白 -->
+    <color name="bg_item">#FFFFFF</color>              <!-- 条目背景：白色 -->
+    <color name="bg_editor">#FFF7F8</color>            <!-- 编辑界面背景：极浅肉粉 -->
+    <color name="bg_card">#FCE4E8</color>              <!-- 分类卡片：浅肉粉 -->
+    <color name="text_title">#5A3038</color>           <!-- 标题文字：深褐粉 -->
+    <color name="text_time">#B98A93</color>            <!-- 时间文字：粉调灰 -->
+    <color name="text_done">#B0B0B0</color>            <!-- 已完成待办：灰色 -->
+    <color name="divider">#F0D2D8</color>              <!-- 分割线：浅肉粉 -->
+</resources>

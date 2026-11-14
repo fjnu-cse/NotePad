@@ -2,16 +2,25 @@ apply plugin: 'com.android.application'
 
 android {
     namespace 'com.example.android.notepad'
-    compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    compileSdk 37
 
     defaultConfig {
         applicationId "com.example.android.notepad"
         minSdkVersion 11
-        targetSdkVersion 23
+        targetSdkVersion 34
+    }
 
-        testApplicationId "com.example.android.notepad.tests"
-        testInstrumentationRunner "android.test.InstrumentationTestRunner"
+    // 旧 android.test 框架在新 SDK 中已被移除，本实验不依赖自带样例测试，
+    // 将 androidTest 源码集置空，避免废弃测试类导致模块编译报错、IDE 红叉
+    sourceSets {
+        androidTest {
+            java.srcDirs = []
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {

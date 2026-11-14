@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 应用主题：Material 浅色 + 深色标题栏，粉色系 -->
+    <!-- colorPrimary = 标题栏底色，colorPrimaryDark = 状态栏，colorAccent = 输入框等强调色 -->
+    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
+        <item name="android:colorPrimary">@color/color_primary</item>
+        <item name="android:colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="android:colorAccent">@color/color_accent</item>
+    </style>
+</resources>
