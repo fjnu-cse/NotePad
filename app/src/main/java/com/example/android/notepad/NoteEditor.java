@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.android.notepad;
 
 import static com.example.android.notepad.R.*;
 
 import android.app.Activity;
+import android.app.AlertDialog;          // ★ 新增：分类选择对话框
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;   // ★ 新增：对话框点击回调
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -59,11 +60,12 @@ public class NoteEditor extends Activity {
      * Creates a projection that returns the note ID and the note contents.
      */
     private static final String[] PROJECTION =
-        new String[] {
-            NotePad.Notes._ID,
-            NotePad.Notes.COLUMN_NAME_TITLE,
-            NotePad.Notes.COLUMN_NAME_NOTE
-    };
+            new String[] {
+                    NotePad.Notes._ID,
+                    NotePad.Notes.COLUMN_NAME_TITLE,
+                    NotePad.Notes.COLUMN_NAME_NOTE,
+                    NotePad.Notes.COLUMN_NAME_CATEGORY   // ★ 新增：查询分类列
+            };
 
     // A label for the saved state of the activity
     private static final String ORIGINAL_CONTENT = "origContent";
@@ -72,6 +74,10 @@ public class NoteEditor extends Activity {
     // as a "state" constant
     private static final int STATE_EDIT = 0;
     private static final int STATE_INSERT = 1;
+
+    /* ★ 新增：可选的分类列表；mCategory 保存当前笔记的分类（null 表示未设置） */
+    private static final String[] CATEGORIES = { "工作", "学习", "生活", "其他" };
+    private String mCategory;
 
     // Global mutable variables
     private int mState;
@@ -95,7 +101,7 @@ public class NoteEditor extends Activity {
             mRect = new Rect();
             mPaint = new Paint();
             mPaint.setStyle(Paint.Style.STROKE);
-            mPaint.setColor(0x800000FF);
+            mPaint.setColor(0x66F2A0AA);   // 肉粉色半透明横线
         }
 
         /**
@@ -189,7 +195,7 @@ public class NoteEditor extends Activity {
             // set the result to be returned.
             setResult(RESULT_OK, (new Intent()).setAction(mUri.toString()));
 
-        // If the action was other than EDIT or INSERT:
+            // If the action was other than EDIT or INSERT:
         } else {
 
             // Logs an error that the action was not understood, finishes the Activity, and
@@ -208,11 +214,11 @@ public class NoteEditor extends Activity {
          * android.content.AsyncQueryHandler or android.os.AsyncTask.
          */
         mCursor = managedQuery(
-            mUri,         // The URI that gets multiple notes from the provider.
-            PROJECTION,   // A projection that returns the note ID and note content for each note.
-            null,         // No "where" clause selection criteria.
-            null,         // No "where" clause selection values.
-            null          // Use the default sort order (modification date, descending)
+                mUri,         // The URI that gets multiple notes from the provider.
+                PROJECTION,   // A projection that returns the note ID and note content for each note.
+                null,         // No "where" clause selection criteria.
+                null,         // No "where" clause selection values.
+                null          // Use the default sort order (modification date, descending)
         );
 
         // For a paste, initializes the data from clipboard.
@@ -274,7 +280,7 @@ public class NoteEditor extends Activity {
                 Resources res = getResources();
                 String text = String.format(res.getString(R.string.title_edit), title);
                 setTitle(text);
-            // Sets the title to "create" for inserts
+                // Sets the title to "create" for inserts
             } else if (mState == STATE_INSERT) {
                 setTitle(getText(R.string.title_create));
             }
@@ -292,15 +298,20 @@ public class NoteEditor extends Activity {
             String note = mCursor.getString(colNoteIndex);
             mText.setTextKeepState(note);
 
+            /* ★ 新增：读取这条笔记已保存的分类，用来初始化 mCategory
+             * （编辑旧笔记时对话框会默认选中它的原分类；旧数据可能为 null） */
+            int colCategoryIndex = mCursor.getColumnIndex(NotePad.Notes.COLUMN_NAME_CATEGORY);
+            mCategory = mCursor.getString(colCategoryIndex);
+
             // Stores the original note text, to allow the user to revert changes.
             if (mOriginalContent == null) {
                 mOriginalContent = note;
             }
 
-        /*
-         * Something is wrong. The Cursor should always contain data. Report an error in the
-         * note.
-         */
+            /*
+             * Something is wrong. The Cursor should always contain data. Report an error in the
+             * note.
+             */
         } else {
             setTitle(getText(R.string.error_title));
             mText.setText(getText(R.string.error_message));
@@ -372,7 +383,7 @@ public class NoteEditor extends Activity {
             } else if (mState == STATE_INSERT) {
                 updateNote(text, text);
                 mState = STATE_EDIT;
-          }
+            }
         }
     }
 
@@ -392,7 +403,7 @@ public class NoteEditor extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.editor_options_menu, menu);
 
-        // Only add extra menu items for a saved note 
+        // Only add extra menu items for a saved note
         if (mState == STATE_EDIT) {
             // Append to the
             // menu items for any other activities that can do stuff with it
@@ -444,8 +455,35 @@ public class NoteEditor extends Activity {
             finish();
         } else if (id == R.id.menu_revert) {
             cancelNote();
+        } else if (id == R.id.menu_category) {   // ★ 新增：点"分类"弹对话框
+            showCategoryDialog();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /* ★ 新增：弹出"选择分类"单选对话框，选中后存入 mCategory，保存时统一写入数据库 */
+    private void showCategoryDialog() {
+        // 找出当前分类在数组中的下标，让对话框默认选中它
+        int checked = 0;
+        if (mCategory != null) {
+            for (int i = 0; i < CATEGORIES.length; i++) {
+                if (CATEGORIES[i].equals(mCategory)) {
+                    checked = i;
+                    break;
+                }
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("选择分类")
+                .setSingleChoiceItems(CATEGORIES, checked, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 记住用户选的分类
+                        mCategory = CATEGORIES[which];
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 
 //BEGIN_INCLUDE(paste)
@@ -526,19 +564,24 @@ public class NoteEditor extends Activity {
         ContentValues values = new ContentValues();
         values.put(NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE, System.currentTimeMillis());
 
+        /* ★ 新增：把用户选择的分类写入数据库（没选过则保持原值不变） */
+        if (mCategory != null) {
+            values.put(NotePad.Notes.COLUMN_NAME_CATEGORY, mCategory);
+        }
+
         // If the action is to insert a new note, this creates an initial title for it.
         if (mState == STATE_INSERT) {
 
             // If no title was provided as an argument, create one from the note text.
             if (title == null) {
-  
+
                 // Get the note's length
                 int length = text.length();
 
                 // Sets the title by getting a substring of the text that is 31 characters long
                 // or the number of characters in the note plus one, whichever is smaller.
                 title = text.substring(0, Math.min(30, length));
-  
+
                 // If the resulting length is more than 30 characters, chops off any
                 // trailing spaces
                 if (length > 30) {
@@ -574,9 +617,7 @@ public class NoteEditor extends Activity {
                 values,  // The map of column names and new values to apply to them.
                 null,    // No selection criteria are used, so no where columns are necessary.
                 null     // No where columns are used, so no where arguments are necessary.
-            );
-
-
+        );
     }
 
     /**
@@ -608,7 +649,10 @@ public class NoteEditor extends Activity {
         if (mCursor != null) {
             mCursor.close();
             mCursor = null;
-            getContentResolver().delete(mUri, null, null);
+            // 移入回收站（软删除），之后可在"回收站"里恢复，而非物理删除
+            ContentValues values = new ContentValues();
+            values.put(NotePad.Notes.COLUMN_NAME_TRASHED, 1);
+            getContentResolver().update(mUri, values, null, null);
             mText.setText("");
         }
     }

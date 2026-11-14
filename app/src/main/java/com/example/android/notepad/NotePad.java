@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.android.notepad;
 
 import android.net.Uri;
@@ -88,20 +87,20 @@ public final class NotePad {
          * append a numeric note id to this Uri to retrieve a note
          */
         public static final Uri CONTENT_ID_URI_BASE
-            = Uri.parse(SCHEME + AUTHORITY + PATH_NOTE_ID);
+                = Uri.parse(SCHEME + AUTHORITY + PATH_NOTE_ID);
 
         /**
          * The content URI match pattern for a single note, specified by its ID. Use this to match
          * incoming URIs or to construct an Intent.
          */
         public static final Uri CONTENT_ID_URI_PATTERN
-            = Uri.parse(SCHEME + AUTHORITY + PATH_NOTE_ID + "/#");
+                = Uri.parse(SCHEME + AUTHORITY + PATH_NOTE_ID + "/#");
 
         /**
          * The content Uri pattern for a notes listing for live folders
          */
         public static final Uri LIVE_FOLDER_URI
-            = Uri.parse(SCHEME + AUTHORITY + PATH_LIVE_FOLDER);
+                = Uri.parse(SCHEME + AUTHORITY + PATH_LIVE_FOLDER);
 
         /*
          * MIME type definitions
@@ -150,5 +149,51 @@ public final class NotePad {
          * <P>Type: INTEGER (long from System.curentTimeMillis())</P>
          */
         public static final String COLUMN_NAME_MODIFICATION_DATE = "modified";
+
+        /**
+         * Column name for the category of the note
+         * <P>Type: TEXT (值为"工作"/"学习"/"生活"/"其他"，可为 NULL)</P>
+         */
+        public static final String COLUMN_NAME_CATEGORY = "category";
+
+        /**
+         * 回收站标记：0=正常笔记，1=已删除（在回收站中，可恢复或彻底删除）
+         * <P>Type: INTEGER，默认 0</P>
+         */
+        public static final String COLUMN_NAME_TRASHED = "trashed";
+    }
+
+    /**
+     * Todos table contract（待办清单）
+     */
+    public static final class Todos implements BaseColumns {
+
+        private Todos() {}
+
+        public static final String TABLE_NAME = "todos";
+
+        private static final String PATH_TODOS = "/todos";
+        private static final String PATH_TODO_ID = "/todos/";
+
+        public static final int TODO_ID_PATH_POSITION = 1;
+
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + PATH_TODOS);
+        public static final Uri CONTENT_ID_URI_BASE =
+                Uri.parse("content://" + AUTHORITY + PATH_TODO_ID);
+
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.google.todo";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.google.todo";
+
+        public static final String DEFAULT_SORT_ORDER = "created DESC";
+
+        /** 待办内容 Type: TEXT */
+        public static final String COLUMN_NAME_CONTENT = "content";
+
+        /** 是否完成 0=未完成 1=已完成 Type: INTEGER */
+        public static final String COLUMN_NAME_DONE = "done";
+
+        /** 创建时间戳 Type: INTEGER */
+        public static final String COLUMN_NAME_CREATE_DATE = "created";
     }
 }
+

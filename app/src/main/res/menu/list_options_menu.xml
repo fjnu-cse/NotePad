@@ -1,15 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!--  This is our one standard application action (creating a new note). -->
+
+    <!-- 新建笔记 -->
     <item android:id="@+id/menu_add"
-          android:icon="@drawable/ic_menu_compose"
-          android:title="@string/menu_add"
-          android:alphabeticShortcut='a'
-          android:showAsAction="always" />
-    <!--  If there is currently data in the clipboard, this adds a PASTE menu item to the menu
-          so that the user can paste in the data.. -->
+        android:icon="@drawable/ic_menu_compose"
+        android:title="@string/menu_add"
+        android:alphabeticShortcut='a'
+        android:showAsAction="always" />
+
+    <!-- 粘贴 -->
     <item android:id="@+id/menu_paste"
-          android:icon="@drawable/ic_menu_compose"
-          android:title="@string/menu_paste"
-          android:alphabeticShortcut='p' />
+        android:icon="@drawable/ic_menu_compose"
+        android:title="@string/menu_paste"
+        android:alphabeticShortcut='p' />
+
+    <!-- 搜索：常驻标题栏的 SearchView -->
+    <item
+        android:id="@+id/menu_search"
+        android:title="搜索"
+        android:showAsAction="always"
+        android:actionViewClass="android.widget.SearchView" />
+
+    <!-- 分类筛选：当前列表内按分类过滤（标签图标） -->
+    <item
+        android:id="@+id/menu_filter"
+        android:icon="@drawable/ic_menu_category"
+        android:title="分类筛选"
+        android:showAsAction="always" />
+
+    <!-- 批量管理：勾选后导出（单条/多条）或删除 -->
+    <item
+        android:id="@+id/menu_batch"
+        android:title="批量管理（导出/删除）" />
+
+    <!-- 分类导航：网格分类页 -->
+    <item
+        android:id="@+id/menu_categories"
+        android:title="笔记分类" />
+
+    <!-- 待办清单 -->
+    <item
+        android:id="@+id/menu_todo"
+        android:title="待办清单" />
+
+    <!-- 一键备份：JSON -->
+    <item
+        android:id="@+id/menu_backup"
+        android:title="一键备份" />
+
+    <!-- 从备份恢复 -->
+    <item
+        android:id="@+id/menu_restore"
+        android:title="从备份恢复" />
+
+    <!-- 回收站：找回或彻底删除已删除的笔记 -->
+    <item
+        android:id="@+id/menu_trash"
+        android:title="回收站" />
 </menu>
