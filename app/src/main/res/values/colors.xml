@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="windowBackground">#F3F4F6</color>
+    <color name="noteItemBackground">#FFFFFF</color>
+    <color name="noteItemStroke">#E4E6EB</color>
+    <color name="noteTitle">#212121</color>
+    <color name="noteSnippet">#757575</color>
+    <color name="noteTime">#3F51B5</color>
+    <color name="noteBackground">#FFFDF6</color>
+    <color name="searchText">#212121</color>
+</resources>

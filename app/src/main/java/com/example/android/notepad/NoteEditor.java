@@ -95,7 +95,7 @@ public class NoteEditor extends Activity {
             mRect = new Rect();
             mPaint = new Paint();
             mPaint.setStyle(Paint.Style.STROKE);
-            mPaint.setColor(0x800000FF);
+            mPaint.setColor(0x33B0BEC5);
         }
 
         /**
@@ -161,6 +161,13 @@ public class NoteEditor extends Activity {
             mState = STATE_EDIT;
             mUri = intent.getData();
 
+            // An EDIT intent without data cannot be handled; finish instead of crashing.
+            if (mUri == null) {
+                Log.e(TAG, "No note URI, exiting");
+                finish();
+                return;
+            }
+
             // For an insert or paste action:
         } else if (Intent.ACTION_INSERT.equals(action)
                 || Intent.ACTION_PASTE.equals(action)) {
@@ -168,7 +175,8 @@ public class NoteEditor extends Activity {
             // Sets the Activity state to INSERT, gets the general note URI, and inserts an
             // empty record in the provider
             mState = STATE_INSERT;
-            mUri = getContentResolver().insert(intent.getData(), null);
+            mUri = (intent.getData() == null) ? null
+                    : getContentResolver().insert(intent.getData(), null);
 
             /*
              * If the attempt to insert the new note fails, shuts down this Activity. The
@@ -258,14 +266,14 @@ public class NoteEditor extends Activity {
         if (mCursor != null) {
             // Requery in case something changed while paused (such as the title)
             mCursor.requery();
+        }
 
-            /* Moves to the first record. Always call moveToFirst() before accessing data in
-             * a Cursor for the first time. The semantics of using a Cursor are that when it is
-             * created, its internal index is pointing to a "place" immediately before the first
-             * record.
-             */
-            mCursor.moveToFirst();
-
+        /* Moves to the first record. Always call moveToFirst() before accessing data in
+         * a Cursor for the first time. The semantics of using a Cursor are that when it is
+         * created, its internal index is pointing to a "place" immediately before the first
+         * record. A null or empty cursor means the note no longer exists.
+         */
+        if (mCursor != null && mCursor.moveToFirst()) {
             // Modifies the window title for the Activity according to the current Activity state.
             if (mState == STATE_EDIT) {
                 // Set the title of the Activity to include the note title
@@ -320,6 +328,7 @@ public class NoteEditor extends Activity {
         // Save away the original text, so we still have it if the activity
         // needs to be killed while paused.
         outState.putString(ORIGINAL_CONTENT, mOriginalContent);
+        super.onSaveInstanceState(outState);
     }
 
     /**
@@ -370,7 +379,8 @@ public class NoteEditor extends Activity {
                 // Creates a map to contain the new values for the columns
                 updateNote(text, null);
             } else if (mState == STATE_INSERT) {
-                updateNote(text, text);
+                // Let updateNote() derive a short title from the note text.
+                updateNote(text, null);
                 mState = STATE_EDIT;
           }
         }
@@ -410,6 +420,11 @@ public class NoteEditor extends Activity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        // The cursor can be missing or empty if the note was deleted while this
+        // activity was in the background; there is nothing to compare then.
+        if (mCursor == null || !mCursor.moveToFirst()) {
+            return super.onPrepareOptionsMenu(menu);
+        }
         // Check if note has changed and enable/disable the revert option
         int colNoteIndex = mCursor.getColumnIndex(NotePad.Notes.COLUMN_NAME_NOTE);
         String savedNote = mCursor.getString(colNoteIndex);
@@ -492,8 +507,8 @@ public class NoteEditor extends Activity {
                 // (moveToFirst() returns true), then this gets the note data from it.
                 if (orig != null) {
                     if (orig.moveToFirst()) {
-                        int colNoteIndex = mCursor.getColumnIndex(NotePad.Notes.COLUMN_NAME_NOTE);
-                        int colTitleIndex = mCursor.getColumnIndex(NotePad.Notes.COLUMN_NAME_TITLE);
+                        int colNoteIndex = orig.getColumnIndex(NotePad.Notes.COLUMN_NAME_NOTE);
+                        int colTitleIndex = orig.getColumnIndex(NotePad.Notes.COLUMN_NAME_TITLE);
                         text = orig.getString(colNoteIndex);
                         title = orig.getString(colTitleIndex);
                     }
