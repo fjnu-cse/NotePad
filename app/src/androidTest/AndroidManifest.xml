@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     The legacy android.test classes are optional framework libraries on modern
+     Android versions. Declaring them here lets the instrumentation test APK load
+     android.test.InstrumentationTestRunner and the test base classes at runtime.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <uses-library
+            android:name="android.test.runner"
+            android:required="false" />
+        <uses-library
+            android:name="android.test.base"
+            android:required="false" />
+        <uses-library
+            android:name="android.test.mock"
+            android:required="false" />
+    </application>
+</manifest>

@@ -72,6 +72,10 @@ public class TitleEditor extends Activity {
         // Get the Intent that activated this Activity, and from it get the URI of the note whose
         // title we need to edit.
         mUri = getIntent().getData();
+        if (mUri == null) {
+            finish();
+            return;
+        }
 
         /*
          * Using the URI passed in with the triggering Intent, gets the note.
@@ -106,11 +110,7 @@ public class TitleEditor extends Activity {
 
         // Verifies that the query made in onCreate() actually worked. If it worked, then the
         // Cursor object is not null. If it is *empty*, then mCursor.getCount() == 0.
-        if (mCursor != null) {
-
-            // The Cursor was just retrieved, so its index is set to one record *before* the first
-            // record retrieved. This moves it to the first record.
-            mCursor.moveToFirst();
+        if (mCursor != null && mCursor.moveToFirst()) {
 
             // Displays the current title text in the EditText object.
             mText.setText(mCursor.getString(COLUMN_INDEX_TITLE));
